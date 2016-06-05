@@ -3,6 +3,7 @@ package com.xlinyu;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -35,15 +36,25 @@ public class EmployeeTest {
 	@Test
 	public void addEmployee() {
 		
-		Transaction tx = session.beginTransaction();
+		Transaction tx = null;
 		
-		Employee employee = new Employee();
-		employee.setName("张三");
-		employee.setEmail("zhangsan@gmail.com");
-		employee.setHiredate(new Date());
-		session.save(employee);
-		
-		tx.commit();
+		try {
+			tx = session.beginTransaction();
+			Employee employee = new Employee();
+			employee.setName("张三");
+			employee.setEmail("zhangsan@gmail.com");
+			employee.setHiredate(new Date());
+			session.save(employee);
+			//int a = 9/0;
+			tx.commit();
+		} catch (HibernateException e) {
+			if(tx != null) tx.rollback();
+			throw new RuntimeException(e.getMessage());
+		} finally {
+			/*if(session != null && session.isOpen()){
+				session.close();
+			}*/
+		}
 		
 	}
 
